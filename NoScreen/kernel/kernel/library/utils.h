@@ -1,5 +1,7 @@
 #pragma once
 
+#define to_rva(address, offset) address + (int32_t)((*(int32_t*)(address + offset) + offset) + sizeof(int32_t))
+
 UNICODE_STRING ansi_to_unicode(const char* str)
 {
 	UNICODE_STRING unicode;
@@ -162,14 +164,6 @@ uintptr_t find_pattern_page_km(const char* szmodule, const char* szsection, cons
 	return psection ? find_pattern(module_base + psection->VirtualAddress, psection->Misc.VirtualSize, bmask, szmask) : 0;
 }
 
-uintptr_t deref_km(uintptr_t address, uint32_t offset)
-{
-	if (address == 0)
-		return 0;
-
-	return address + (int32_t)((*(int32_t*)(address + offset) + offset) + sizeof(int32_t));
-}
-
 NTSTATUS init_function()
 {	
 	change_window_tree_protection_address = reinterpret_cast<PVOID>(find_pattern_page_km("win32kfull.sys", ".text", 
@@ -178,7 +172,7 @@ NTSTATUS init_function()
 	if (change_window_tree_protection_address == 0)
 		return STATUS_UNSUCCESSFUL;
 
-	change_window_tree_protection_address = reinterpret_cast<PVOID>(deref_km(reinterpret_cast<uintptr_t>(change_window_tree_protection_address), 1));
+	change_window_tree_protection_address = reinterpret_cast<PVOID>(to_rva(reinterpret_cast<uintptr_t>(change_window_tree_protection_address), 1));
 
 	return (change_window_tree_protection_address != 0) ? STATUS_SUCCESS : STATUS_UNSUCCESSFUL;
 }
