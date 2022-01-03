@@ -162,10 +162,23 @@ uintptr_t find_pattern_page_km(const char* szmodule, const char* szsection, cons
 	return psection ? find_pattern(module_base + psection->VirtualAddress, psection->Misc.VirtualSize, bmask, szmask) : 0;
 }
 
-NTSTATUS init_function()
+uintptr_t deref_km(uintptr_t address, uint32_t offset)
 {
+	if (address == 0)
+		return 0;
+
+	return address + (int32_t)((*(int32_t*)(address + offset) + offset) + sizeof(int32_t));
+}
+
+NTSTATUS init_function()
+{	
 	change_window_tree_protection_address = reinterpret_cast<PVOID>(find_pattern_page_km("win32kfull.sys", ".text", 
-		"\x48\x89\x5C\x24\x00\x48\x89\x4C\x24\x00\x55\x56\x57\x41\x54\x41\x55\x41\x56\x41\x57\x48\x8B\xEC", "xxxx?xxxx?xxxxxxxxxxxxxx"));
+		"\xE8\x00\x00\x00\x00\x8B\xF0\x85\xC0\x75\x18", "x????xxxxxx"));
+
+	if (change_window_tree_protection_address == 0)
+		return STATUS_UNSUCCESSFUL;
+
+	change_window_tree_protection_address = reinterpret_cast<PVOID>(deref_km(reinterpret_cast<uintptr_t>(change_window_tree_protection_address), 1));
 
 	return (change_window_tree_protection_address != 0) ? STATUS_SUCCESS : STATUS_UNSUCCESSFUL;
 }
