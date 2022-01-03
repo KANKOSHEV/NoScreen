@@ -165,7 +165,7 @@ uintptr_t find_pattern_page_km(const char* szmodule, const char* szsection, cons
 uintptr_t deref_km(uintptr_t address, uint32_t offset)
 {
 	if (address == 0)
-		return 0;
+	    return 0;
 
 	return address + (int32_t)((*(int32_t*)(address + offset) + offset) + sizeof(int32_t));
 }
