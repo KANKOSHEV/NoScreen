@@ -166,8 +166,6 @@ uintptr_t find_pattern_page_km(const char* szmodule, const char* szsection, cons
 
 NTSTATUS init_function()
 {	
-	*(PVOID*)&validate_hwnd = reinterpret_cast<PVOID>(get_system_base_export("win32kbase.sys", "ValidateHwnd"));
-	
 	auto gre_protect_sprite_content_address = reinterpret_cast<PVOID>(find_pattern_page_km("win32kfull.sys", ".text",
 		"\xE8\x00\x00\x00\x00\x8B\xF8\x85\xC0\x75\x0E", "x????xxxxxx"));
 
@@ -183,9 +181,5 @@ NTSTATUS init_function()
 
 NTSTATUS protect_sprite_content_fn(pprotect_sprite_content req)
 {
-	const auto window_instance = validate_hwnd(req->window_handle);
-	if (!window_instance)
-		return STATUS_INVALID_ADDRESS;
-
-	return gre_protect_sprite_content(0, *reinterpret_cast<uint64_t*>(window_instance), 1, req->value) ? STATUS_SUCCESS : STATUS_UNSUCCESSFUL;
+	return gre_protect_sprite_content(0, req->window_handle, 1, req->value) ? STATUS_SUCCESS : STATUS_UNSUCCESSFUL;
 }
