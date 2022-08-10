@@ -58,7 +58,6 @@ typedef struct _KLDR_DATA_TABLE_ENTRY
 	/* 0x009c */ unsigned long TimeDateStamp;
 } KLDR_DATA_TABLE_ENTRY, *PKLDR_DATA_TABLE_ENTRY; /* size: 0x00a0 */
 
-uint64_t(*validate_hwnd)(uint64_t) = nullptr;
 int64_t(*gre_protect_sprite_content)(int64_t, uint64_t, int32_t, char) = nullptr;
 
 extern "C"
