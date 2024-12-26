@@ -165,9 +165,16 @@ uintptr_t find_pattern_page_km(const char* szmodule, const char* szsection, cons
 }
 
 NTSTATUS init_function()
-{	
+{
 	auto gre_protect_sprite_content_address = reinterpret_cast<PVOID>(find_pattern_page_km("win32kfull.sys", ".text",
 		"\xE8\x00\x00\x00\x00\x8B\xF8\x85\xC0\x75\x0E", "x????xxxxxx"));
+
+	// Windows 11 24H2
+	if (gre_protect_sprite_content_address == 0)
+	{
+		gre_protect_sprite_content_address = reinterpret_cast<PVOID>(find_pattern_page_km("win32kfull.sys", ".text",
+			"\xE8\x00\x00\x00\x00\x8B\xD8\x85\xC0\x75\x0E", "x????xxxxxx"));
+	}
 
 	if (gre_protect_sprite_content_address == 0)
 		return STATUS_INVALID_ADDRESS;
